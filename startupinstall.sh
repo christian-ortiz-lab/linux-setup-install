@@ -133,5 +133,70 @@ sudo apt install tmux
 #Installing Virtual Box
 sudo apt install virtualbox
 
+# Variables
+FIREFOX_VERSION="136.0.1"
+FIREFOX_URL="https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-CA/firefox-$FIREFOX_VERSION.tar.xz"
+FIREFOX_DIR="/opt/firefox"
+DESKTOP_ENTRY="/usr/share/applications/firefox.desktop"
+TARBALL="firefox-$FIREFOX_VERSION.tar.xz"
 
+# Step 1: Download Firefox tarball
+echo "Downloading Firefox $FIREFOX_VERSION..."
+wget -O $TARBALL $FIREFOX_URL
+
+if [ $? -ne 0 ]; then
+    echo "Error: Download failed."
+    exit 1
+fi
+
+# Step 2: Extract the tarball
+echo "Extracting Firefox tarball..."
+tar -xf $TARBALL
+
+if [ $? -ne 0 ]; then
+    echo "Error: Extraction failed."
+    exit 1
+fi
+
+# Step 3: Move the extracted folder to /opt/ directory
+echo "Moving Firefox files to /opt/firefox..."
+sudo mv firefox $FIREFOX_DIR
+
+if [ $? -ne 0 ]; then
+    echo "Error: Moving files failed."
+    exit 1
+fi
+
+# Step 4: Create a symbolic link for easier access
+echo "Creating symbolic link for firefox..."
+sudo ln -s $FIREFOX_DIR/firefox/firefox /usr/local/bin/firefox
+
+if [ $? -ne 0 ]; then
+    echo "Error: Symbolic link creation failed."
+    exit 1
+fi
+
+# Step 5: Create a desktop entry for easy access from the application menu
+echo "Creating desktop entry for Firefox..."
+sudo bash -c "cat > $DESKTOP_ENTRY <<EOF
+[Desktop Entry]
+Name=Firefox
+Comment=Web Browser
+Exec=$FIREFOX_DIR/firefox/firefox %u
+Icon=$FIREFOX_DIR/firefox/browser/chrome/icons/default/default128.png
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+EOF"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Desktop entry creation failed."
+    exit 1
+fi
+
+# Step 6: Clean up downloaded tarball
+echo "Cleaning up..."
+rm $TARBALL
+
+echo "Firefox $FIREFOX_VERSION has been successfully installed!"
 echo "Installation Complete!"
